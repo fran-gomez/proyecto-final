@@ -1,0 +1,100 @@
+services:
+  mongodb:
+    container_name: mongo_db
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_DATABASE: peliculas
+    volumes:
+      # En este directorio especial se pueden poner todos los
+      # scripts que se quieran ejecutar en el primer inicio del
+      # container, aprovechamos para hacer el seed de la db
+      - ./database:/docker-entrypoint-initdb.d
+    networks:
+      - mongodb_network
+
+  movies:
+    container_name: movies
+    build:
+      context: ./movies
+      dockerfile: Dockerfile
+    environment:
+      PORT: 3000
+    ports:
+      - 3000:3000
+    networks:
+      - mongodb_network
+      - movies_newtork
+    depends_on:
+      - mongodb
+    restart: no
+
+  random_movies:
+    container_name: random_movies
+    build:
+      context: ./random_movies
+      dockerfile: Dockerfile
+    environment:
+      PORT: 3001
+      MOVIES_URL: http://movies:3000
+    depends_on:
+      - movies
+    networks:
+      - movies_newtork
+    ports:
+      - 3001:3001
+    restart: no
+
+  front:
+    container_name: front
+    build:
+      context: ./front-end
+      dockerfile: Dockerfile
+    ports:
+      - 81:80
+    depends_on:
+      - random_movies
+
+  history:
+    container_name: search_history
+    build:
+      context: ./historial
+      dockerfile: Dockerfile
+    environment:
+      PORT: 3002
+    depends_on:
+      - queue_worker
+    ports:
+      - 3002:3002
+    networks:
+      - movies_newtork
+
+  recomendations:
+    container_name: recomendations
+    build:
+      context: ./recomendador
+      dockerfile: Dockerfile
+    environment:
+      PORT: 3003
+    depends_on:
+      - history
+    ports:
+      - 3003:3003
+    networks:
+      - movies_newtork
+
+  queue_worker:
+    hostname: rabbitmq
+    image: rabbitmq:3-management
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - "./data:/var/lib/rabbitmq/mnesia/"
+    networks:
+      - movies_newtork
+
+networks:
+  mongodb_network:
+  movies_newtork:

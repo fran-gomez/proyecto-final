@@ -1,0 +1,24 @@
+Proyecto final para la materia Topicos Avanzados de Desarrollo Web
+
+El sistema es una grilla simple de peliculas, con un apartado especial
+para recomendaciones en base al historial de "clicks" realizados por el
+usuario.
+
+Cada 2 minutos el sitio solicita una recomendacion la cual sera mostrada
+al pie de pagina bajo el titulo Recomendaciones aunque el plural esta de mas ;)
+
+El algoritmo de recomendaciones no llega a un algoritmo de ML por falta de tiempo,
+pero trate de hacer algo relativamente dirigido a las preferencias del usuario,
+consultando los generos de peliculas, actores y directores del historial de busqueda
+y dirigiendo las recomendaciones en base a uno de los tres parametros que sea mas
+recurrente para el usuario.
+Cuando el usuario no busco nada aun (no hay historial previo), se sugiere una
+pelicula totalmente al azar. Con las sucesivas busquedas, el algoritmo tiende a
+una preferencia.
+
+Known Bugs:
+
+- A la hora de realizar una busqueda de pelicula de genero Comedy aleatoria,
+  por alguna razon desconocida, mongodb no retorna ningun documento, lo cual
+  es bastante estarño ya que los strings para la query salen de valores previamente
+  devueltos por la BD
